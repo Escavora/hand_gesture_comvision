@@ -1,65 +1,71 @@
-import Image from "next/image";
+'use client';
+import { useState, Suspense, useEffect, useCallback } from 'react';
+import { Canvas } from '@react-three/fiber';
+import WebcamCapture from '@/components/WebcamCapture';
+import ParticleSystem from '@/components/ParticleSystem';
+import { GestureType } from '@/lib/GestureClassifier';
+
+const GESTURE_INFO: Record<GestureType, { label: string; emoji: string; color: string }> = {
+  None:        { label: 'Diam / Galaksi',        emoji: '🌀', color: 'text-gray-400' },
+  Open_Hand:   { label: 'KAMU BISA!',            emoji: '✋', color: 'text-yellow-400' },
+  Peace:       { label: 'TERUS MAJU!',           emoji: '✌️', color: 'text-green-400' },
+  Call_Me:     { label: 'NIKMATIN AJA DULU!',    emoji: '🤙', color: 'text-pink-400' },
+  Thumbs_Up:   { label: 'KERJA BAGUS!',          emoji: '👍', color: 'text-blue-400' },
+  Point_Up:    { label: 'KAMU NO.1!',            emoji: '☝️', color: 'text-purple-400' },
+  Rock:        { label: 'SEMANGAT!',             emoji: '🤘', color: 'text-orange-400' },
+  Kamehameha:  { label: 'HAA!!!',                emoji: '🤲', color: 'text-cyan-300' },
+  Double_Peace:{ label: 'CHILL BRO',             emoji: '✌️✌️', color: 'text-green-300' },
+};
 
 export default function Home() {
+  const [gesture, setGesture] = useState<GestureType>('None');
+  const info = GESTURE_INFO[gesture] || GESTURE_INFO['None'];
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
+    <main className="relative w-full h-screen bg-black overflow-hidden">
+      {/* 3D Canvas Layer */}
+      <div className="absolute inset-0 z-0">
+        <Canvas camera={{ position: [0, 0, 12], fov: 65 }}>
+          <ambientLight intensity={0.5} />
+          <pointLight position={[10, 10, 10]} intensity={1} />
+          <Suspense fallback={null}>
+            <ParticleSystem gesture={gesture} />
+          </Suspense>
+        </Canvas>
+      </div>
+
+      {/* UI Overlay Layer */}
+      <div className="absolute top-0 left-0 w-full p-4 z-10 pointer-events-none flex justify-between items-start">
+        {/* Title panel */}
+        <div className="glass-panel p-3 border-cyan-500/30">
+          <p className="text-gray-400 font-mono text-[10px] max-w-[200px]">
+            Tunjukkan tanganmu ke kamera. Setiap gestur akan memunculkan pesan semangat dari partikel kosmik.
           </p>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+
+        {/* Active gesture panel */}
+        <div className="glass-panel p-3 flex flex-col items-end border-cyan-500/30 min-w-[140px]">
+          <div className="flex items-center gap-2">
+            <span className="text-lg">{info.emoji}</span>
+            <span className={`text-sm font-bold tracking-wide ${info.color}`}>{info.label}</span>
+          </div>
         </div>
-      </main>
-    </div>
+      </div>
+
+      {/* Gesture guide — bottom right */}
+      <div className="absolute bottom-4 right-4 z-10 glass-panel p-3 border-cyan-500/30 pointer-events-none">
+        <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-xs font-mono">
+          {Object.entries(GESTURE_INFO).filter(([k]) => k !== 'None').map(([key, val]) => (
+            <div key={key} className={`flex items-center gap-2 transition-opacity duration-300 ${gesture === key ? 'opacity-100' : 'opacity-40'}`}>
+              <span className="text-sm">{val.emoji}</span>
+              <span className="text-gray-300 text-[10px]">{val.label}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Webcam Component */}
+      <WebcamCapture onGesture={setGesture} />
+    </main>
   );
 }
