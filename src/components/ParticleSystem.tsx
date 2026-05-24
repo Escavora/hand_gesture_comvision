@@ -272,76 +272,35 @@ export default function ParticleSystem({ gesture }: { gesture: GestureType }) {
     // --- Mesh-level Animations based on Gesture ---
     const t = state.clock.elapsedTime;
     
-    let targetScale = 1;
-    let targetRotX = 0;
-    
     // Base targets to snap back to center/facing camera
     const pi2 = Math.PI * 2;
     let targetRotY = Math.round(pointsRef.current.rotation.y / pi2) * pi2;
     let targetRotZ = Math.round(pointsRef.current.rotation.z / pi2) * pi2;
     let rotSpeed = 0.08;
 
-    switch (gesture) {
-      case 'None':
-        // Galaxy idle: spin freely
-        targetRotY = pointsRef.current.rotation.y + delta * 0.15;
-        targetRotZ = pointsRef.current.rotation.z + delta * 0.05;
-        rotSpeed = 1;
-        break;
-      case 'Open_Hand':
-        // Breathing scale & hover
-        targetScale = 1 + Math.sin(t * 2) * 0.05;
-        pointsRef.current.position.y = Math.sin(t * 3) * 0.2;
-        break;
-      case 'Peace':
-        // Cat bobblehead (wobble Z and Y)
-        targetRotZ += Math.sin(t * 5) * 0.15;
-        targetRotY += Math.cos(t * 4) * 0.1;
-        break;
-      case 'Call_Me':
-        // Ringing pulse (fast vibration)
-        targetScale = 1 + Math.sin(t * 20) * 0.06;
-        targetRotZ += Math.sin(t * 30) * 0.04;
-        break;
-      case 'Thumbs_Up':
-        // Lily flower swaying in the wind
-        targetRotZ += Math.sin(t * 1.5) * 0.15;
-        targetRotX = Math.sin(t * 1.2) * 0.1;
-        break;
-      case 'Point_Up':
-        // Bouncing up and down
-        pointsRef.current.position.y = Math.abs(Math.sin(t * 5)) * 0.5 - 0.25;
-        break;
-      case 'Rock':
-        // Headbanging / Vibrating
-        targetRotZ += Math.sin(t * 40) * 0.1;
-        targetScale = 1 + Math.sin(t * 15) * 0.03;
-        break;
-      case 'Kamehameha':
-        // Energy charge: rapid rotation and chaotic scale
-        targetRotZ = pointsRef.current.rotation.z + delta * 3;
-        rotSpeed = 1;
-        targetScale = 1 + Math.random() * 0.1;
-        break;
-      case 'Double_Peace':
-        // Continuous spinning text
-        targetRotY = pointsRef.current.rotation.y + delta * 2.5;
-        rotSpeed = 1;
-        break;
+    if (gesture === 'None') {
+      // Galaxy idle: spin freely
+      targetRotY = pointsRef.current.rotation.y + delta * 0.15;
+      targetRotZ = pointsRef.current.rotation.z + delta * 0.05;
+      rotSpeed = 1;
     }
 
-    // Reset position smoothly if not animated
-    if (gesture !== 'Point_Up' && gesture !== 'Open_Hand') {
-       pointsRef.current.position.y += (0 - pointsRef.current.position.y) * 0.1;
-    }
+    // Reset position smoothly
+    pointsRef.current.position.y += (0 - pointsRef.current.position.y) * 0.1;
 
     // Apply rotations
-    pointsRef.current.rotation.x += (targetRotX - pointsRef.current.rotation.x) * rotSpeed;
+    pointsRef.current.rotation.x += (0 - pointsRef.current.rotation.x) * rotSpeed;
     pointsRef.current.rotation.y += (targetRotY - pointsRef.current.rotation.y) * rotSpeed;
     pointsRef.current.rotation.z += (targetRotZ - pointsRef.current.rotation.z) * rotSpeed;
     
     // Apply scale
-    pointsRef.current.scale.lerp(new THREE.Vector3(targetScale, targetScale, targetScale), 0.15);
+    pointsRef.current.scale.lerp(new THREE.Vector3(1, 1, 1), 0.15);
+
+    // Apply fade in fade out for all
+    const material = pointsRef.current.material as THREE.PointsMaterial;
+    if (material) {
+      material.opacity = 0.5 + Math.sin(t * 2.5) * 0.4;
+    }
   });
 
   return (
