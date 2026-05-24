@@ -8,9 +8,9 @@ import { GestureType } from '@/lib/GestureClassifier';
 const GESTURE_INFO: Record<GestureType, { label: string; emoji: string; color: string }> = {
   None:        { label: 'Diam / Galaksi',        emoji: '🌀', color: 'text-gray-400' },
   Open_Hand:   { label: 'KAMU BISA!',            emoji: '✋', color: 'text-yellow-400' },
-  Peace:       { label: 'TERUS MAJU!',           emoji: '✌️', color: 'text-green-400' },
+  Peace:       { label: 'PEACE!',           emoji: '🐱', color: 'text-green-400' },
   Call_Me:     { label: 'NIKMATIN AJA DULU!',    emoji: '🤙', color: 'text-pink-400' },
-  Thumbs_Up:   { label: 'KERJA BAGUS!',          emoji: '👍', color: 'text-blue-400' },
+  Thumbs_Up:   { label: 'THUMBS UP!',          emoji: '🌷', color: 'text-blue-400' },
   Point_Up:    { label: 'KAMU NO.1!',            emoji: '☝️', color: 'text-purple-400' },
   Rock:        { label: 'SEMANGAT!',             emoji: '🤘', color: 'text-orange-400' },
   Kamehameha:  { label: 'HAA!!!',                emoji: '🤲', color: 'text-cyan-300' },
